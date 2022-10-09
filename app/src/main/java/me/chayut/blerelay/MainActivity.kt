@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import timber.log.Timber
 import java.util.ArrayList
-import java.util.logging.Logger
+import me.chayut.blerelay.BluetoothHandler.Companion.getInstance
 
 class MainActivity : AppCompatActivity() {
 
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initBluetoothHandler() {
-//        val bluetoothHandler = getInstance(applicationContext)
+        val bluetoothHandler = getInstance(applicationContext)
         Log.d("XXX", "initBluetoothHandler: ")
         Timber.i("Bluetooth start")
     }

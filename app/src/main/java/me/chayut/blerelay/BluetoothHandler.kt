@@ -2,10 +2,14 @@ package me.chayut.blerelay
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import com.influxdb.client.domain.WritePrecision
+import com.influxdb.client.kotlin.InfluxDBClientKotlinFactory
+import com.influxdb.client.write.Point
 import com.welie.blessed.*
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.math.BigInteger
+import java.time.Instant
 import java.util.*
 
 
@@ -25,6 +29,7 @@ internal class BluetoothHandler private constructor(context: Context) {
                 Timber.i("RSSI is $rssi")
 
                 setupTemperatureNotifications(peripheral)
+                setupHumidityNotifications(peripheral)
 
             } catch (e: IllegalArgumentException) {
                 Timber.e(e)
@@ -39,11 +44,79 @@ internal class BluetoothHandler private constructor(context: Context) {
             peripheral.observe(it) { value ->
 //                val measurement = HeartRateMeasurement.fromBytes(value)
 //                heartRateChannel.trySend(measurement)
+
+
                 Timber.d("1 :%X", value[0])
                 Timber.d("2: %X", value[1])
 
                 val tempInt = value[1].toInt() * 256 +  value[0].toUByte().toInt()
                 Timber.d("Temp: %d", tempInt)
+                val tempVal = tempInt.toFloat()/ 100.0f
+                scope.launch {
+                    try {
+                        // You can generate an API token from the "API Tokens Tab" in the UI
+                        val token = BuildConfig.apikey //System.getenv()["INFLUX_TOKEN"]
+                        val org = "nonesecure@gmail.com"
+                        val bucket = "test2"
+
+                        val client = InfluxDBClientKotlinFactory.create("https://ap-southeast-2-1.aws.cloud2.influxdata.com", token.toCharArray(), org, bucket)
+
+                        val writeApi = client.getWriteKotlinApi()
+
+                        val point = Point
+                            .measurement("environment")
+                            .addTag("host", "host1")
+                            .addField("temperature", tempVal)
+                            .time(Instant.now(), WritePrecision.NS);
+
+                        writeApi.writePoint(point)
+
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                    }
+                }
+
+            }
+        }
+    }
+
+    private suspend fun  setupHumidityNotifications(peripheral: BluetoothPeripheral) {
+        peripheral.getCharacteristic(BLE_UUID_ENVIRONMENTAL_SENSING_SERVICE, BLE_UUID_HUMIDITY)?.let {
+            peripheral.observe(it) { value ->
+
+                Timber.d("1 :%X", value[0])
+                Timber.d("2: %X", value[1])
+
+                val humidityInt = value[1].toInt() * 256 +  value[0].toUByte().toInt()
+                Timber.d("Humidity: %d", humidityInt)
+
+                val humidityVal = humidityInt.toFloat()/ 100.0f
+
+
+                scope.launch {
+                    try {
+                        // You can generate an API token from the "API Tokens Tab" in the UI
+                        val token = BuildConfig.apikey //System.getenv()["INFLUX_TOKEN"]
+                        val org = "nonesecure@gmail.com"
+                        val bucket = "test2"
+
+                        val client = InfluxDBClientKotlinFactory.create("https://ap-southeast-2-1.aws.cloud2.influxdata.com", token.toCharArray(), org, bucket)
+
+                        val writeApi = client.getWriteKotlinApi()
+
+                        val point = Point
+                            .measurement("environment")
+                            .addTag("host", "host1")
+                            .addField("humidity", humidityVal)
+                            .time(Instant.now(), WritePrecision.NS);
+
+                        writeApi.writePoint(point)
+
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                    }
+                }
+
             }
         }
     }

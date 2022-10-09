@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def apikeyPropertiesFile = rootProject.file("apikey.properties");
+def apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+
 android {
     namespace 'me.chayut.blerelay'
     compileSdk 33
@@ -15,6 +19,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "apikey", apikeyProperties['apikey'])
     }
 
     buildTypes {
@@ -43,4 +48,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.jakewharton.timber:timber:5.0.1'
     implementation "com.github.weliem:blessed-android-coroutines:0.3.2"
+    implementation "com.influxdb:influxdb-client-kotlin:6.6.0"
 }

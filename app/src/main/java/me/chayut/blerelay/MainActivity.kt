@@ -182,10 +182,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initBluetoothHandler() {
         val bluetoothHandler = getInstance(applicationContext)
-//        Log.d("XXX", "initBluetoothHandler: ")
         Timber.i(" initBluetoothHandler")
 
         collectTemperature(bluetoothHandler)
+        collectHumidity(bluetoothHandler)
     }
 
     private fun collectTemperature(bluetoothHandler: BluetoothHandler) {
@@ -194,8 +194,21 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     binding.textViewTemperature.text = String.format(
                         Locale.ENGLISH,
-                        "Temperature %.2f",
+                        "Temperature: %.2f C",
                         it.temperatureValue)
+                }
+            }
+        }
+    }
+
+    private fun collectHumidity(bluetoothHandler: BluetoothHandler) {
+        scope.launch {
+            bluetoothHandler.humidityChannel.consumeAsFlow().collect {
+                withContext(Dispatchers.Main) {
+                    binding.textViewHumidity.text = String.format(
+                        Locale.ENGLISH,
+                        "Humidity: %.2f %%",
+                        it.humidityValue)
                 }
             }
         }

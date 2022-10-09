@@ -9,7 +9,6 @@ import com.welie.blessed.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
-import java.math.BigInteger
 import java.time.Instant
 import java.util.*
 
@@ -17,6 +16,7 @@ import java.util.*
 internal class BluetoothHandler private constructor(context: Context) {
 
     val temperatureChannel = Channel<TemperatureMeasurement>(Channel.UNLIMITED)
+    val humidityChannel = Channel<HumidityMeasurement>(Channel.UNLIMITED)
 
     private fun handlePeripheral(peripheral: BluetoothPeripheral) {
         scope.launch {
@@ -96,6 +96,8 @@ internal class BluetoothHandler private constructor(context: Context) {
 
                 val humidityVal = humidityInt.toFloat()/ 100.0f
 
+                val measurement = HumidityMeasurement(humidityValue = humidityVal)
+                humidityChannel.trySend(measurement)
 
                 scope.launch {
                     try {

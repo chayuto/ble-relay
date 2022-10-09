@@ -7,6 +7,7 @@ import com.influxdb.client.kotlin.InfluxDBClientKotlinFactory
 import com.influxdb.client.write.Point
 import com.welie.blessed.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
 import java.math.BigInteger
 import java.time.Instant
@@ -15,7 +16,7 @@ import java.util.*
 
 internal class BluetoothHandler private constructor(context: Context) {
 
-//    val environmentChannel = Channel<BloodPressureMeasurement>(UNLIMITED)
+    val temperatureChannel = Channel<TemperatureMeasurement>(Channel.UNLIMITED)
 
     private fun handlePeripheral(peripheral: BluetoothPeripheral) {
         scope.launch {
@@ -42,8 +43,6 @@ internal class BluetoothHandler private constructor(context: Context) {
     private suspend fun  setupTemperatureNotifications(peripheral: BluetoothPeripheral) {
         peripheral.getCharacteristic(BLE_UUID_ENVIRONMENTAL_SENSING_SERVICE, BLE_UUID_TEMPERATURE)?.let {
             peripheral.observe(it) { value ->
-//                val measurement = HeartRateMeasurement.fromBytes(value)
-//                heartRateChannel.trySend(measurement)
 
 
                 Timber.d("1 :%X", value[0])
@@ -52,6 +51,11 @@ internal class BluetoothHandler private constructor(context: Context) {
                 val tempInt = value[1].toInt() * 256 +  value[0].toUByte().toInt()
                 Timber.d("Temp: %d", tempInt)
                 val tempVal = tempInt.toFloat()/ 100.0f
+
+
+                val measurement = TemperatureMeasurement(temperatureValue = tempVal)
+                temperatureChannel.trySend(measurement)
+
                 scope.launch {
                     try {
                         // You can generate an API token from the "API Tokens Tab" in the UI

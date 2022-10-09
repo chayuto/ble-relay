@@ -17,18 +17,26 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.consumeAsFlow
 import timber.log.Timber
 import me.chayut.blerelay.BluetoothHandler.Companion.getInstance
+import me.chayut.blerelay.databinding.ActivityMainBinding
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
         Timber.i("onCreate")
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
         registerReceiver(
             locationServiceStateReceiver,
@@ -177,24 +185,19 @@ class MainActivity : AppCompatActivity() {
 //        Log.d("XXX", "initBluetoothHandler: ")
         Timber.i(" initBluetoothHandler")
 
-        collectEnvironmentData(bluetoothHandler)
+        collectTemperature(bluetoothHandler)
     }
 
-    private fun collectEnvironmentData(bluetoothHandler: BluetoothHandler) {
+    private fun collectTemperature(bluetoothHandler: BluetoothHandler) {
         scope.launch {
-//            bluetoothHandler.bloodpressureChannel.consumeAsFlow().collect {
-//                withContext(Dispatchers.Main) {
-//                    measurementValue!!.text = String.format(
-//                        Locale.ENGLISH,
-//                        "%.0f/%.0f %s, %.0f bpm\n%s\n",
-//                        it.systolic,
-//                        it.diastolic,
-//                        if (it.unit == ObservationUnit.MMHG) "mmHg" else "kpa",
-//                        it.pulseRate,
-//                        dateFormat.format(it.timestamp ?: Calendar.getInstance())
-//                    )
-//                }
-//            }
+            bluetoothHandler.temperatureChannel.consumeAsFlow().collect {
+                withContext(Dispatchers.Main) {
+                    binding.textViewTemperature.text = String.format(
+                        Locale.ENGLISH,
+                        "Temperature %.2f",
+                        it.temperatureValue)
+                }
+            }
         }
     }
 

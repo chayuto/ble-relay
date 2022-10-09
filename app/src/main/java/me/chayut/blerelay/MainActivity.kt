@@ -16,12 +16,10 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import timber.log.Timber
-import java.util.ArrayList
 import me.chayut.blerelay.BluetoothHandler.Companion.getInstance
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -177,7 +175,27 @@ class MainActivity : AppCompatActivity() {
     private fun initBluetoothHandler() {
         val bluetoothHandler = getInstance(applicationContext)
 //        Log.d("XXX", "initBluetoothHandler: ")
-        Timber.i("Bluetooth start")
+        Timber.i(" initBluetoothHandler")
+
+        collectEnvironmentData(bluetoothHandler)
+    }
+
+    private fun collectEnvironmentData(bluetoothHandler: BluetoothHandler) {
+        scope.launch {
+//            bluetoothHandler.bloodpressureChannel.consumeAsFlow().collect {
+//                withContext(Dispatchers.Main) {
+//                    measurementValue!!.text = String.format(
+//                        Locale.ENGLISH,
+//                        "%.0f/%.0f %s, %.0f bpm\n%s\n",
+//                        it.systolic,
+//                        it.diastolic,
+//                        if (it.unit == ObservationUnit.MMHG) "mmHg" else "kpa",
+//                        it.pulseRate,
+//                        dateFormat.format(it.timestamp ?: Calendar.getInstance())
+//                    )
+//                }
+//            }
+        }
     }
 
     companion object {

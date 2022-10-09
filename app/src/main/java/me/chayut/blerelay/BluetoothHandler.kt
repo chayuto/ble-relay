@@ -4,12 +4,10 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import com.welie.blessed.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import timber.log.Timber
-import timber.log.Timber.DebugTree
-import java.nio.ByteOrder
+import java.math.BigInteger
 import java.util.*
+
 
 internal class BluetoothHandler private constructor(context: Context) {
 
@@ -26,10 +24,26 @@ internal class BluetoothHandler private constructor(context: Context) {
                 val rssi = peripheral.readRemoteRssi()
                 Timber.i("RSSI is $rssi")
 
+                setupTemperatureNotifications(peripheral)
+
             } catch (e: IllegalArgumentException) {
                 Timber.e(e)
             } catch (b: GattException) {
                 Timber.e(b)
+            }
+        }
+    }
+
+    private suspend fun  setupTemperatureNotifications(peripheral: BluetoothPeripheral) {
+        peripheral.getCharacteristic(BLE_UUID_ENVIRONMENTAL_SENSING_SERVICE, BLE_UUID_TEMPERATURE)?.let {
+            peripheral.observe(it) { value ->
+//                val measurement = HeartRateMeasurement.fromBytes(value)
+//                heartRateChannel.trySend(measurement)
+                Timber.d("1 :%X", value[0])
+                Timber.d("2: %X", value[1])
+
+                val tempInt = value[1].toInt() * 256 +  value[0].toUByte().toInt()
+                Timber.d("Temp: %d", tempInt)
             }
         }
     }

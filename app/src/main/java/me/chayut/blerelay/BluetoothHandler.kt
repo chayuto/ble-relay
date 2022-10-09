@@ -31,12 +31,6 @@ internal class BluetoothHandler private constructor(context: Context) {
                     Timber.i("Received: $manufacturerName")
                 }
 
-                val model = peripheral.readCharacteristic(DIS_SERVICE_UUID, MODEL_NUMBER_CHARACTERISTIC_UUID).asString()
-                Timber.i("Received: $model")
-
-                val batteryLevel = peripheral.readCharacteristic(BTS_SERVICE_UUID, BATTERY_LEVEL_CHARACTERISTIC_UUID).asUInt8()
-                Timber.i("Battery level: $batteryLevel")
-
             } catch (e: IllegalArgumentException) {
                 Timber.e(e)
             } catch (b: GattException) {
@@ -48,6 +42,7 @@ internal class BluetoothHandler private constructor(context: Context) {
 
     private fun startScanning() {
         Log.d("XXX", "startScanning")
+        Timber.d("startScanning")
         central.scanForPeripheralsWithServices(supportedServices,
             { peripheral, scanResult ->
                 Log.d("XXX", "Found peripheral '${peripheral.name}' with RSSI ${scanResult.rssi}")
@@ -134,7 +129,6 @@ internal class BluetoothHandler private constructor(context: Context) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
-        Timber.plant(DebugTree())
         central = BluetoothCentralManager(context)
 
         central.observeConnectionState { peripheral, state ->

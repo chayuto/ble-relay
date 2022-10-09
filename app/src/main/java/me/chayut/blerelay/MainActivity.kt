@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         Timber.i("onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        Log.d("Chayut", "onResume")
+//        Log.d("Chayut", "onResume")
         Timber.i("onResume")
         super.onResume()
         if (bluetoothManager.adapter != null) {
@@ -177,7 +176,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initBluetoothHandler() {
         val bluetoothHandler = getInstance(applicationContext)
-        Log.d("XXX", "initBluetoothHandler: ")
+//        Log.d("XXX", "initBluetoothHandler: ")
         Timber.i("Bluetooth start")
     }
 
@@ -185,6 +184,5 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ENABLE_BT = 1
         private const val ACCESS_LOCATION_REQUEST = 2
     }
-
 
 }
